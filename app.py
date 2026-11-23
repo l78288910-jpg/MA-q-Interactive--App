@@ -168,6 +168,21 @@ h1,h2,h3 {{ color:{NAVY}; }}
 .hero {{ background:linear-gradient(120deg,{NAVY},{BLUE}); color:white; padding:22px 28px; border-radius:14px; }}
 .hero h1 {{ color:white; margin:0; }} .hero p {{ color:#DBEAFE; margin:4px 0 0 0; }}
 .say {{ background:{PALE}; border-radius:10px; padding:12px 16px; color:{NAVY}; }}
+/* Mobile responsive rules */
+@media (max-width: 768px) {{
+  .block-container {{ padding-left: 0.85rem !important; padding-right: 0.85rem !important; }}
+  .hero {{ padding: 16px !important; border-radius: 12px !important; }}
+  .hero h1 {{ font-size: 1.45rem !important; line-height: 1.25 !important; }}
+  .hero p {{ font-size: 0.9rem !important; }}
+  h1 {{ font-size: 1.55rem !important; }}
+  h2 {{ font-size: 1.3rem !important; }}
+  h3 {{ font-size: 1.12rem !important; }}
+  .card {{ padding: 11px 12px !important; border-left-width: 4px !important; }}
+  .card .v {{ font-size: 1.25rem !important; overflow-wrap: anywhere; }}
+  .card .t {{ font-size: 0.78rem !important; }}
+  .say {{ padding: 10px 12px !important; font-size: 0.92rem !important; }}
+  [data-testid="stDataFrame"] {{ max-width: 100% !important; overflow-x: auto !important; }}
+}}
 </style>"""
 
 
@@ -225,7 +240,7 @@ def page_intro():
     st.write("Un modèle de moyenne mobile d'ordre q exprime la valeur actuelle comme une combinaison linéaire de l'innovation actuelle "
              "et de ses q valeurs passées (bruit blanc).")
     st.latex(r"X_t = \mu + \varepsilon_t + \theta_1\varepsilon_{t-1} + \dots + \theta_q\varepsilon_{t-q}")
-    c = st.columns(5)
+    c = st.columns(5, wrap=True)
     for col, (t, v) in zip(c, [("X_t", "observation actuelle"), ("μ", "moyenne théorique"), ("ε_t", "innovation actuelle"),
                                ("θ_i", "coefficient du modèle"), ("q", "ordre du modèle")]):
         col.markdown(card(t, f"<span style='font-size:1rem'>{v}</span>"), unsafe_allow_html=True)
@@ -233,7 +248,7 @@ def page_intro():
     q = st.radio("Ordre illustré", [1, 2, 3], horizontal=True, format_func=lambda v: f"MA({v})")
     st.pyplot(fig_structure([0.5, 0.3, 0.2][:q]))
     st.markdown("### MA(1) ou MA(2) ?")
-    a, b = st.columns(2)
+    a, b = st.columns(2, wrap=True)
     a.markdown("**MA(1)**"); a.latex(r"X_t=\mu+\varepsilon_t+\theta_1\varepsilon_{t-1}")
     a.write("Une seule innovation passée. ACF non nulle au lag 1 seulement.")
     b.markdown("**MA(2)**"); b.latex(r"X_t=\mu+\varepsilon_t+\theta_1\varepsilon_{t-1}+\theta_2\varepsilon_{t-2}")
@@ -245,7 +260,7 @@ def page_simulation():
     st.title("Simulation interactive")
     st.caption("Modifiez les paramètres dans la barre latérale : tout se met à jour automatiquement.")
     st.latex(formula_latex(p["mu"], p["thetas"]))
-    c = st.columns(4)
+    c = st.columns(4, wrap=True)
     for col, (t, v) in zip(c, [("Ordre", f"MA({p['q']})"), ("Taille n", p["n"]), ("σ", f"{p['sigma']:g}"), ("Graine", p["seed"])]):
         col.markdown(card(t, v), unsafe_allow_html=True)
     st.pyplot(fig_series(X, p["mu"], f"Série simulée MA({p['q']})"))
@@ -271,7 +286,7 @@ def page_stats():
     p = get_params(); X, eps, s = run(p)
     st.title("Propriétés statistiques")
     st.latex(r"E(X_t)=\mu \qquad Var(X_t)=\sigma^2\left(1+\theta_1^2+\dots+\theta_q^2\right)")
-    c = st.columns(5)
+    c = st.columns(5, wrap=True)
     for col, (t, v) in zip(c, [("Moyenne théorique", f"{s['mean_th']:.3f}"), ("Moyenne empirique", f"{s['mean_emp']:.3f}"),
                                ("Variance théorique", f"{s['var_th']:.3f}"), ("Variance empirique", f"{s['var_emp']:.3f}"),
                                ("Écart-type (emp.)", f"{s['std_emp']:.3f}")]):
@@ -308,7 +323,7 @@ def page_compare():
     p = get_params()
     st.title("Comparaison MA(1) vs MA(2)")
     st.caption("μ, σ, n et la graine viennent de la barre latérale ; les coefficients se règlent ici.")
-    a, b = st.columns(2)
+    a, b = st.columns(2, wrap=True)
     t1 = a.slider("MA(1) : θ₁", -1.5, 1.5, 0.5, 0.05, key="c1")
     t2a = b.slider("MA(2) : θ₁", -1.5, 1.5, 0.5, 0.05, key="c2a")
     t2b = b.slider("MA(2) : θ₂", -1.5, 1.5, 0.3, 0.05, key="c2b")
@@ -333,7 +348,7 @@ def page_presentation():
     X, eps = simulate_ma(n, mu, th, sigma, seed); s = compute_stats(X, mu, th, sigma)
     steps = ["1. Formule", "2. Série simulée", "3. Statistiques", "4. ACF", "5. Interprétation"]
     st.session_state.setdefault("step", 0)
-    c1, c2, c3 = st.columns([1, 4, 1])
+    c1, c2, c3 = st.columns([1, 4, 1], wrap=True)
     if c1.button("◀ Précédent", disabled=st.session_state.step == 0):
         st.session_state.step -= 1; st.rerun()
     if c3.button("Suivant ▶", disabled=st.session_state.step == 4):
@@ -347,7 +362,7 @@ def page_presentation():
         st.pyplot(fig_series(X, mu, "Simulation d'un modèle MA(1)"))
         st.markdown('<div class="say">À dire : la série oscille autour de μ = 10 ; le bruit blanc ε_t alimente ces fluctuations.</div>', unsafe_allow_html=True)
     elif k == 2:
-        cc = st.columns(4)
+        cc = st.columns(4, wrap=True)
         for col, (t, v) in zip(cc, [("Moyenne th. / emp.", f"{s['mean_th']:.2f} / {s['mean_emp']:.2f}"),
                                     ("Variance th. / emp.", f"{s['var_th']:.2f} / {s['var_emp']:.2f}"),
                                     ("Écart-type emp.", f"{s['std_emp']:.2f}"), ("ρ(1) théorique", f"{theoretical_acf(th, 1)[1]:.2f}")]):
